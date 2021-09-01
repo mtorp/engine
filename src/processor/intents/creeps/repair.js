@@ -35,7 +35,7 @@ module.exports = function(object, intent, {roomObjects, bulk, stats, eventLog}) 
     boostedParts.sort((a,b) => b-a);
     boostedParts = boostedParts.slice(0,repairEffect);
 
-    var boostedEffect = Math.min(Math.floor(repairEffect + _.sum(boostedParts)), repairHitsMax);
+    var boostedEffect = Math.min(Math.floor(repairEffect + _.sum(_.map(_.values(boostedParts), v => +v))), repairHitsMax);
 
     if(!boostedEffect) {
         return;

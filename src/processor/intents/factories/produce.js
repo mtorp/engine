@@ -27,7 +27,7 @@ module.exports = function(object, intent, scope) {
     }
 
     const targetTotal = utils.calcResources(object);
-    const componentsTotal = _.sum(C.COMMODITIES[intent.resourceType].components);
+    const componentsTotal = _.sum(_.map(_.values(C.COMMODITIES[intent.resourceType].components), v => +v));
     if (targetTotal - componentsTotal + (C.COMMODITIES[intent.resourceType].amount||1) > object.storeCapacity) {
         return;
     }

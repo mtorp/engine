@@ -50,7 +50,7 @@ module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, stats, 
     boostedParts.sort((a,b) => b-a);
     boostedParts = boostedParts.slice(0,buildEffect);
 
-    var boostedEffect = Math.floor(buildEffect + _.sum(boostedParts));
+    var boostedEffect = Math.floor(buildEffect + _.sum(_.map(_.values(boostedParts), v => +v)));
 
     if(target.level < 8) {
         var nextLevelProgress = C.CONTROLLER_LEVELS[target.level];
