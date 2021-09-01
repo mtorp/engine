@@ -156,7 +156,7 @@ const refillTowers = function refillTowers(context) {
 
     const underchargedTowers = _.filter(towers, t => (t.store.energy <= 2*C.TOWER_ENERGY_COST) && _.some(ramparts, {x: t.x, y: t.y}));
     if(_.some(underchargedTowers)) {
-        const towerToCharge = _.min(underchargedTowers, 'store.energy');
+        const towerToCharge = (_.min(underchargedTowers, 'store.energy') || Infinity);
         if(towerToCharge) {
             intents.set(core._id, 'transfer', {id: towerToCharge._id, amount: towerToCharge.storeCapacityResource.energy - towerToCharge.store.energy, resourceType: C.RESOURCE_ENERGY});
             return true;
@@ -171,7 +171,7 @@ const refillCreeps = function refillCreeps(context) {
 
     const underchargedCreeps = _.filter(defenders, c => (c.storeCapacity > 0) && (2*c.store.energy <= c.storeCapacity));
     if(_.some(underchargedCreeps)) {
-        const creep = _.min(underchargedCreeps, 'store.energy');
+        const creep = (_.min(underchargedCreeps, 'store.energy') || Infinity);
         if(creep) {
             intents.set(core._id, 'transfer', {id: creep._id, amount: creep.storeCapacity - creep.store.energy, resourceType: C.RESOURCE_ENERGY});
             return true;
@@ -212,7 +212,7 @@ const focusClosest = function focusClosest(context) {
         return false;
     }
 
-    const target = _.min(hostiles, c => utils.dist(c, core));
+    const target = (_.min(hostiles, c => utils.dist(c, core)) || Infinity);
     if(!target) {
         return false;
     }
@@ -245,8 +245,8 @@ const focusMax = function focusMax(context) {
     }
 
     const activeTowers = _.filter(towers, t => t.store.energy >= C.TOWER_ENERGY_COST);
-    const target = _.max(hostiles, creep => {
-        let damage = _.sum(activeTowers, tower => {
+    const target = (_.max(_.map(hostiles, v => +v), creep => {
+        let damage = _.sumBy(_.values(_.map(activeTowers, v => +v)), tower => {
             let r = utils.dist(creep, tower);
             let amount = C.TOWER_POWER_ATTACK;
             if(r > C.TOWER_OPTIMAL_RANGE) {
@@ -263,7 +263,7 @@ const focusMax = function focusMax(context) {
             });
             return Math.floor(amount);
         });
-        damage += _.sum(defenders, defender => {
+        damage += _.sumBy(_.values(_.map(defenders, v => +v)), defender => {
             let d = 0;
             if((range(defender, creep) <= 3) && _.some(defender.body, {type: C.RANGED_ATTACK})) {
                 d += utils.calcBodyEffectiveness(defender.body, C.RANGED_ATTACK, 'rangedAttack', C.RANGED_ATTACK_POWER);
@@ -275,7 +275,7 @@ const focusMax = function focusMax(context) {
         });
 
         return damage;
-    });
+    }) || -Infinity);
 
     const meleesNear = _.filter(defenders, d => (range(d, target) == 1) && _.some(d.body, {type: C.ATTACK}));
     for(let melee of meleesNear) {
@@ -366,8 +366,8 @@ const assignDefenders = function assignDefenders(context) {
         meleeSpots.push(..._.filter(context.ramparts, r => utils.dist(h, r) <= 1));
         rangerSpots.push(..._.filter(context.ramparts, r => utils.dist(h, r) <= 3));
     });
-    meleeSpots = _.unique(meleeSpots);
-    rangerSpots = _.unique(_.without(rangerSpots, ...meleeSpots));
+    meleeSpots = _.uniq(meleeSpots);
+    rangerSpots = _.uniq(_.without(rangerSpots, ...meleeSpots));
     const rangers = [], melees = [];
     _.forEach(context.defenders, d => {
         if(_.some(d.body, {type: C.ATTACK})) { melees.push(d._id.toString()); }

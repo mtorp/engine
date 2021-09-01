@@ -51,18 +51,18 @@ module.exports = function(creep, scope) {
         }
     }
 
-    const meleeTarget = _.min(hostilesInMeleeRange, 'hits');
+    const meleeTarget = (_.min(hostilesInMeleeRange, 'hits') || Infinity);
     if(meleeTarget) {
         intents.set(creep._id, 'attack', { id: meleeTarget._id, x: meleeTarget.x, y: meleeTarget.y });
     }
 
     if(_.some(hostilesInRangedRange)) {
         const damageByRange = [10, 10, 4, 1];
-        const massDamage = _.sum(hostilesInRangedRange, c => damageByRange[utils.dist(creep, c)]);
+        const massDamage = _.sumBy(_.values(_.map(hostilesInRangedRange, v => +v)), c => damageByRange[utils.dist(creep, c)]);
         if(massDamage > 13) {
             intents.set(creep._id, 'rangedMassAttack', {});
         } else {
-            const rangedTarget = _.min(hostilesInRangedRange, 'hits');
+            const rangedTarget = (_.min(hostilesInRangedRange, 'hits') || Infinity);
             intents.set(creep._id, 'rangedAttack', { id: rangedTarget._id });
         }
     }

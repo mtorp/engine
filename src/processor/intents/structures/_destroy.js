@@ -42,7 +42,7 @@ module.exports = function(object, scope, attackType) {
         if(object.effects) {
             const collapseEffect = _.find(object.effects, {effect: C.EFFECT_COLLAPSE_TIMER});
             if(collapseEffect) {
-                ruin.decayTime = _.max([ruin.decayTime, collapseEffect.endTime]);
+                ruin.decayTime = (_.max([ruin.decayTime, collapseEffect.endTime]) || -Infinity);
             }
         }
 
